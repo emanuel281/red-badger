@@ -103,7 +103,9 @@ class Grid:
     def show(self):
         self.save_all_moves()
         self.display_final_positions()
-        self.ax.plot(*zip(*self.plots), marker="x")
+        for plot in self.plots:
+            x_axis, y_axis = zip(*plot)
+            self.ax.plot(x_axis, y_axis, marker="x")
         plt.show()
 
 
