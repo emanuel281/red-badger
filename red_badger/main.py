@@ -3,7 +3,7 @@ from typing import Iterable, List, Literal, Tuple
 
 
 class Robot:
-    def __init__(self, starting_position: Tuple[int, int], grid_size: Tuple[int, int], direction: Literal["N", "S", "E", "W"]):
+    def __init__(self, starting_position: Tuple[int, int], instructions: str, direction: Literal["N", "S", "E", "W"]):
         """Initialize the robot with given grid and starting position
         
         Args:
@@ -15,23 +15,15 @@ class Robot:
         self.y = starting_position[1]
         self.direction = direction
         self.moves: List[Tuple[int, int]] = [(self.x, self.y)]
-        self.grid_size = grid_size
+        self.instructions = instructions
         self.is_lost = False
+        self.grid_size = (50, 50)
 
-    def check_if_lost(self, next_move: Tuple[int, int]):
-        """Check if the robot is lost
-        
-        Args:
-            next_move (Tuple[int, int]): The next position of the robot
-        """
-        x_max = self.grid_size[0]
-        y_max = self.grid_size[1]
-        next_x = next_move[0]
-        next_y = next_move[1]
-        if next_x < 0 or next_x > x_max or next_y < 0 or next_y > y_max or self.is_lost:
-            self.is_lost = True
-            return True
-        return False
+    def set_is_lost(self, is_lost: bool):
+        self.is_lost = is_lost
+    
+    def set_grid_size(self, width: int, height: int):
+        self.grid_size = (width, height)
 
     def _update_direction(self, instruction: Literal["L", "R"]) -> str:
         """
@@ -67,6 +59,21 @@ class Robot:
         self.direction = new_direction
         return new_direction
 
+    def _is_out_of_bounds(self, position: Tuple[int, int]) -> bool:
+        """
+            Check if the robot is out of bounds
+        
+        Args:
+            position (Tuple[int, int]): The position to check
+        
+        Returns:
+            bool: True if the robot is lost, False otherwise
+        """
+        x_max = self.grid_size[0]
+        y_max = self.grid_size[1]
+        x_min = 0
+        y_min = 0
+        return position[0] < x_min or position[0] > x_max or position[1] < y_min or position[1] > y_max
     def _get_new_position(self, direction: str, pace: int = 1) -> Tuple[int, int]:
         """
             Get the new position of the robot
@@ -78,33 +85,42 @@ class Robot:
         Returns:
             Tuple[int, int]: The new position of the robot
         """
+        new_position = (self.x, self.y)
         match direction:
             case "N":
-                return (self.x, self.y + pace)
+                new_position = (self.x, self.y + pace)
             case "S":
-                return (self.x, self.y - pace)
+                new_position = (self.x, self.y - pace)
             case "E":
-                return (self.x + pace, self.y)
+                new_position = (self.x + pace, self.y)
             case "W":
-                return (self.x - pace, self.y)
+                new_position = (self.x - pace, self.y)
+        
+        is_lost = self._is_out_of_bounds(new_position)
 
-    def move(self, moves: Iterable[str], pace: int = 1):
+        return new_position, is_lost
+
+    def move(self, pace: int = 1, disappearing_positions: List[Tuple[int, int]] = []):
         """Move the robot in the direction it is facing
         
         Args:
-            moves (Iterable[str]): The moves to make the robot
             pace (int, optional): The number of steps to move the robot. Defaults to 1.
+            disappearing_positions (List[Tuple[int, int]], optional): The positions where the robot will disappear. Defaults to [].
         """
-        moves_len = min(100, len(moves))
+        moves_len = min(100, len(self.instructions))
         for i in range(moves_len):
             if self.is_lost:
                 break
-            move = moves[i]
+            move = self.instructions[i]
             if move == "L" or move == "R":
                 self._update_direction(move)
             elif move == "F":
-                next_position = self._get_new_position(self.direction, pace)
-                if self.check_if_lost(next_position):
+                next_position, is_lost = self._get_new_position(self.direction, pace)
+                if next_position in disappearing_positions:
+                    continue
+                if is_lost:
+                    self.lost_at = next_position[0], next_position[1]
+                    self.set_is_lost(True)
                     break
                 self.x, self.y = next_position
                 self.moves.append(next_position)
@@ -114,14 +130,22 @@ class Robot:
 
 
 class Grid:
-    def __init__(self, width: int = 50, height: int = 50):
+    def __init__(self, width: int = 50, height: int = 50, robots: List[Robot] = []):
         self.width = width
         self.height = height
         self.fig, self.ax = plt.subplots()
-        self.robots: List[Robot] = []
+        self.robots: List[Robot] = robots
+        self.disappearing_positions: List[Tuple[int, int]] = []
     
     def add_robot(self, robot: Robot):
+        robot.set_grid_size(self.width, self.height)
         self.robots.append(robot)
+    
+    def move_robots(self):
+        for robot in self.robots:
+            robot.move(disappearing_positions=self.disappearing_positions)
+            if robot.is_lost:
+                self.disappearing_positions.append(robot.lost_at)
 
     def save_all_moves(self):
         plots = []
@@ -153,14 +177,12 @@ if __name__ == "__main__":
         0 3 W
         LLFFFLFLFL
     """
-    grid = Grid()
-    robot1 = Robot((1, 1), (5, 3), "E")
-    robot1.move("RFRFRFRF")
+    grid = Grid(5, 3)
+    robot1 = Robot((1, 1), instructions="RFRFRFRF", direction="E")
     grid.add_robot(robot1)
-    robot2 = Robot((3, 2), (5, 3), "N")
-    robot2.move("FRRFLLFFRRFLL")
+    robot2 = Robot((3, 2), instructions="FRRFLLFFRRFLL", direction="N")
     grid.add_robot(robot2)
-    robot3 = Robot((0, 3), (5, 3), "W")
-    robot3.move("LLFFFLFLFL")
+    robot3 = Robot((0, 3), instructions="LLFFFLFLFL", direction="W")
     grid.add_robot(robot3)
+    grid.move_robots()
     grid.show()
