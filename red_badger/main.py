@@ -25,7 +25,7 @@ if __name__ == "__main__":
     grid_size = grid_size.split(" ")
     grid = Grid(int(grid_size[0]), int(grid_size[1]))
     while True:
-        """Improvement: Specify the number of robots and use that to break the loop"""
+        """TODO: Improvement: Specify the number of robots and use that to break the loop"""
         line = input("Enter robot start position and direction(e.g, 1 1 E): \n").strip()
         if not line:
             break

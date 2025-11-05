@@ -41,6 +41,19 @@
 poetry install
 poetry run python red_badger/main.py
 ```
+### Example
+```
+Enter grid size(e.g, 5 3): 5 3
+Enter robot start position and direction(e.g, 1 1 E): 1 1 E
+Enter robot instructions(e.g, RFRFRFRF): RFRFRFRF
+Enter robot start position and direction(e.g, 1 1 E): 3 2 N
+Enter robot instructions(e.g, RFRFRFRF): FRRFLLFFRRFLL
+Enter robot start position and direction(e.g, 1 1 E): 0 3 W
+Enter robot instructions(e.g, RFRFRFRF): LLFFFLFLFL
+1 1 E 
+3 3 N LOST
+2 3 S
+```
 
 ## Project testing
 ```bash
