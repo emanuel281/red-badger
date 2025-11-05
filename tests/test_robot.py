@@ -10,10 +10,24 @@ def robot() -> Robot:
 
 def test_update_direction(robot: Robot):
     assert robot.direction == "E"
-    robot._update_direction("L")
+    robot.turn("L")
     assert robot.direction == "N"
-    robot._update_direction("R")
+    robot.turn("R")
     assert robot.direction == "E"
+
+
+def test_get_last_marker(robot: Robot):
+    robot.direction = "E"
+    assert robot.get_last_marker() == ">"
+
+    robot.turn("L")
+    assert robot.get_last_marker() == "^"
+
+    robot.turn("L")
+    assert robot.get_last_marker() == "<"
+
+    robot.turn("L")
+    assert robot.get_last_marker() == "v"
 
 
 def test_is_out_of_bounds(robot: Robot):

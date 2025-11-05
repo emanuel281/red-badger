@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from matplotlib import pyplot as plt
+from matplotlib import markers, pyplot as plt
 from red_badger.entities.robot import RobotInterface
 from abc import ABC, abstractmethod
 
@@ -46,8 +46,16 @@ class Grid(GridInterface):
             robot.display_latest_position()
 
     def show(self):
+        """
+        Show the grid with the robots on it
+        """
         self.display_latest_positions()
         for robot in self.robots:
             x_axis, y_axis = zip(*robot.get_moves())
-            self.ax.plot(x_axis, y_axis, marker="x")
+
+            self.ax.plot(x_axis, y_axis, marker=".")
+            # last position (ideally color matches line)
+            self.ax.plot(x_axis[-1], y_axis[-1],
+                marker=robot.get_last_marker())
+
         plt.show()

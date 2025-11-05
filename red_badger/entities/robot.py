@@ -20,6 +20,18 @@ class RobotInterface(ABC):
     def move(self, pace: int = 1, disappearing_positions: List[Tuple[int, int]] = []):
         pass
 
+    @abstractmethod
+    def get_last_marker(self) -> str:
+        pass
+
+    @abstractmethod
+    def display_latest_position(self):
+        pass
+
+    @abstractmethod
+    def turn(self, instruction: Literal["L", "R"]) -> str:
+        pass
+
 
 class Robot(RobotInterface):
     def __init__(self, starting_position: Tuple[int, int], instructions: str, direction: Literal["N", "S", "E", "W"]):
@@ -47,7 +59,19 @@ class Robot(RobotInterface):
     def set_grid_size(self, width: int, height: int):
         self.grid_size = (width, height)
 
-    def _update_direction(self, instruction: Literal["L", "R"]) -> str:
+    def get_last_marker(self) -> str:
+        marker = None
+        if self.direction == "N":
+            marker = "^"
+        elif self.direction == "S":
+            marker = "v"
+        elif self.direction == "E":
+            marker = ">"
+        elif self.direction == "W":
+            marker = "<"
+        return marker
+
+    def turn(self, instruction: Literal["L", "R"]) -> str:
         """
             Change the robot direction by 90 degrees.
 
@@ -140,7 +164,7 @@ class Robot(RobotInterface):
                 break
             move = self.instructions[i]
             if move == "L" or move == "R":
-                self._update_direction(move)
+                self.turn(move)
             elif move == "F":
                 next_position, is_lost = self._get_new_position(self.direction, pace)
                 if next_position in disappearing_positions:
