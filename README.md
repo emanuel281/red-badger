@@ -1,7 +1,7 @@
 # Martian Robot
 
 ## Solution
-* Since this can be thought as just graphing problem, we can use matplotlib to solve this problem
+* Since this can be thought as just plotting a graph problem, we can use matplotlib to solve this problem
 * First we create a plain figure (grid class)
 ** Initialize the grid with width and height
 ** Create a function that will be used add robot to the grid

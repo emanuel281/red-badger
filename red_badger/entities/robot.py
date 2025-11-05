@@ -1,7 +1,27 @@
 from typing import List, Literal, Tuple
+from abc import ABC, abstractmethod
 
 
-class Robot:
+class RobotInterface(ABC):
+    
+    @abstractmethod
+    def set_grid_size(self, width: int, height: int):
+        pass
+
+    @abstractmethod
+    def set_is_lost(self, is_lost: bool):
+        pass
+
+    @abstractmethod
+    def get_moves(self) -> List[Tuple[int, int]]:
+        pass
+
+    @abstractmethod
+    def move(self, pace: int = 1, disappearing_positions: List[Tuple[int, int]] = []):
+        pass
+
+
+class Robot(RobotInterface):
     def __init__(self, starting_position: Tuple[int, int], instructions: str, direction: Literal["N", "S", "E", "W"]):
         """Initialize the robot with given grid and starting position
         
@@ -20,6 +40,9 @@ class Robot:
 
     def set_is_lost(self, is_lost: bool):
         self.is_lost = is_lost
+    
+    def get_moves(self) -> List[Tuple[int, int]]:
+        return self.moves
     
     def set_grid_size(self, width: int, height: int):
         self.grid_size = (width, height)
